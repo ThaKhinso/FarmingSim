@@ -3,6 +3,7 @@
 #include "imgui.h"    // NOTE: Declares global (extern) variables and screens functions
 #include "raymath.h"
 #include <math.h>
+#include "animation.hpp"
 
 #define RINI_IMPLEMENTATION
 #include "rini.h"
@@ -49,8 +50,26 @@ int main(void)
     Rectangle grass = { 0, grassHeight*6, grassWidth, grassHeight};
     Vector2 grassPosition = {0,0};
 
+    Texture2D actions = LoadTexture("resources/sprites/Characters/playerActions.png");
+    const int toolActionWidth = 96/2;
+    const int toolActionHeight = 576/12;
+    Rectangle workingSprite = {0,0, toolActionWidth, toolActionHeight};
+    Animation testanim = {
+        actions,
+        toolActionWidth,
+        toolActionHeight,
+        3,
+        2,
+        .5f,
+        1.f,
+        true,
+        12,
+        2,
+
+    };
+
     Camera2D camera = { 0 };
-    camera.target = position; // Camera will follow this point (e.g., player position)
+    camera.target = { screenWidth/2, screenHeight/2 };//position; // Camera will follow this point (e.g., player position)
     camera.offset = { screenWidth/2, screenHeight/2 };  // Camera view position (center of the screen)
     camera.rotation = 0.0f;                 // No rotation
     camera.zoom = 1.0f;  
@@ -82,6 +101,7 @@ int main(void)
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
         float dt = GetFrameTime();
+        UpdateAnimation(&testanim, dt);
         // Zoom based on mouse wheel
         float wheel = GetMouseWheelMove();
         Vector2 movement = {0, 0};
@@ -193,6 +213,9 @@ int main(void)
             }
             
         }
+
+        DrawAnimation(&testanim, {50,50});
+
         DrawTextureRec(texture, walk, position, WHITE);
         // DrawTexturePro(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, Color tint);
 
