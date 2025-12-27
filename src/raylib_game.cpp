@@ -54,9 +54,11 @@ int main(void)
     const int toolActionWidth = 96/2;
     const int toolActionHeight = 576/12;
     Rectangle workingSprite = {0,0, toolActionWidth, toolActionHeight};
-    Animation testanim = Animation(actions, toolActionWidth, toolActionHeight,
-                                   5, 2, 20.f, 0.f, true, 12, 2);
+    Animation testanim = Animation(texture, SPRITE_DIM, SPRITE_DIM,
+                                   1, 4, 8.f, 0.f, true, 4, 4);
+    Vector2 testPosition = {100,50};
     
+    bool testIsMoving = false;
     /*{
         actions,
         toolActionWidth,
@@ -109,6 +111,7 @@ int main(void)
         // Zoom based on mouse wheel
         float wheel = GetMouseWheelMove();
         Vector2 movement = {0, 0};
+        Vector2 testMovement = {0, 0};
         if (!isImGuiHovered && IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
             Vector2 delta = GetMouseDelta();
@@ -135,25 +138,60 @@ int main(void)
             
         }
         
-        if (IsKeyDown(KEY_W)) 
+        if(IsKeyDown(KEY_T)) {
+            testanim.updateRecSelection(1, 2);
+        }
+
+        if(IsKeyDown(KEY_R)) {
+            testanim.updateRecSelection(3, 2);
+        }
+
+        if (IsKeyDown(KEY_UP)) 
         {
           movement.y -= 1 * dt;
           walk.y = SPRITE_DIM;
         }
-        if (IsKeyDown(KEY_S)) 
+        if (IsKeyDown(KEY_DOWN)) 
         {
           movement.y += 1 * dt;
           walk.y = 0;
         }
-        if (IsKeyDown(KEY_A)) 
+        if (IsKeyDown(KEY_LEFT)) 
         {
           movement.x -= 1 * dt;
           walk.y = SPRITE_DIM*2;
         }
-        if (IsKeyDown(KEY_D)) 
+        if (IsKeyDown(KEY_RIGHT)) 
         {
           movement.x += 1 * dt;
           walk.y = SPRITE_DIM * 3;
+        }
+
+        if (IsKeyDown(KEY_W)) {
+            testanim.updateRecSelection(5, 4);
+            testMovement.y -= 1 * dt;
+        }
+
+        if (IsKeyDown(KEY_S)) {
+            testanim.updateRecSelection(1, 4);
+            testMovement.y += 1 * dt;
+        }
+
+        if (IsKeyDown(KEY_A)) {
+            testanim.updateRecSelection(9, 4);
+            testMovement.x -= 1 * dt;
+        }
+
+        if (IsKeyDown(KEY_D)) {
+            testanim.updateRecSelection(13, 4);
+            testMovement.y += 1 * dt;
+        }
+
+        if(testMovement.x != 0 || testMovement.y != 0) {
+            testMovement = Vector2Normalize(testMovement);
+            testIsMoving = true;
+        } else {
+            testIsMoving = false;
         }
 
         // Normalize movement vector to maintain constant speed (diagonal movement)
@@ -170,7 +208,14 @@ int main(void)
         // Update player position based on movement
         
         position = position + movement*tempSpeed;
+        testPosition = testPosition + testMovement*2.f;
         // Update animation
+
+        if(testIsMoving) {
+            testanim.UpdateAnimation(dt);
+        } else {
+            testanim.updateRecSelection(1, 4);
+        }
         
         if(isMoving){
             frameCounter++;
@@ -192,7 +237,7 @@ int main(void)
             //walk.y = 0;
         }
         
-        printf("niga\n");
+        // printf("niga\n");
 
 
         // walk.x = 0;
@@ -219,9 +264,10 @@ int main(void)
             
         }
 
+        // testanim.UpdateAnimation(dt);
         //DrawAnimation(&testanim, {50,50});
-        testanim.DrawAnimation({100, 50});
-        testanim.UpdateAnimation(dt);
+        testanim.DrawAnimation(testPosition);
+
 
         DrawTextureRec(texture, walk, position, WHITE);
         // DrawTexturePro(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, Color tint);
