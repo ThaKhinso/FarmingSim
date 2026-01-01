@@ -4,7 +4,7 @@
 class Object{
 public:
     Object(std::string name, int dps, int health, Vector2& position, bool attackable);
-    char* name;
+    std::string name;
     bool canBeAttacked;
     int health;
     int dps;
