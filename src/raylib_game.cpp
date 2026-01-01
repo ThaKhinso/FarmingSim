@@ -74,7 +74,7 @@ int main(void)
     bool chop = false;
     bool testIsMoving = false;
     std::vector<Object> interactable;
-    Object pickaxe = Object("pickaxe", 100, 1000, position, false);
+    Object pickaxe = Object(std::string("pickaxe"), 100, 1000, position, false);
     
 
 
@@ -82,8 +82,27 @@ int main(void)
     const int treeWidth = 32;
     const int treeHeight = 32;
     Rectangle treeSelector = {16,0, treeWidth, treeHeight};
+    const int choopedWoodWidth = 16;
+    const int choopedWoodHeight = 16;
+    Rectangle choppedWood = {80, 32, choopedWoodWidth, choopedWoodHeight};
     std::vector<Vector2> randomPositions;
     
+    Texture2D water = LoadTexture("resources/sprites/Tilesets/Water.png");
+    const int waterWidth = 16;
+    const int waterHeight = 16;
+    Rectangle waterSelector = {0, 0, waterWidth, waterHeight};
+    RenderTexture2D waterRT = LoadRenderTexture(4096, 4096);
+
+    BeginTextureMode(waterRT);
+    ClearBackground(BLANK);
+
+    for (int i = 0; i < waterRT.texture.width; i += waterWidth) {
+      for (int j = 0; j < waterRT.texture.height; j += waterHeight) {
+        DrawTextureRec(water, waterSelector, {(float)i, (float)j},
+                       WHITE);
+      }
+    }
+    EndTextureMode();
 
 
 
@@ -99,7 +118,7 @@ int main(void)
         const int tempY = GetRandomValue(0, screenHeight);
         randomPositions.push_back({(float)tempX, (float)tempY});
         Vector2 tempp = {(float)tempX, (float)tempY};
-        Object temp = Object("tree", 0, 1000, tempp, true);
+        Object temp = Object("tree", 0, 300, tempp, true);
         interactable.push_back(temp);
     }
 
@@ -323,10 +342,23 @@ int main(void)
         // }
 
         BeginMode2D(camera);
+        DrawTextureRec(
+            waterRT.texture,
+            {0, 0, (float)waterRT.texture.width, (float) - waterRT.texture.height},
+            {-2000, -2000}, WHITE);
+
         testTile.draw();
         for (int i = 0; i < interactable.size(); i++) {
-            if(!interactable[i].gone) DrawTextureRec(biomis,treeSelector,randomPositions[i],WHITE);
+            if (!interactable[i].gone)
+          {
+              DrawTextureRec(biomis, treeSelector, randomPositions[i], WHITE);
+            } else if (interactable[i].gone) {
+            
+              DrawTextureRec(biomis, choppedWood, randomPositions[i], WHITE);
+            }
         }
+
+        DrawTextureRec(biomis, choppedWood, {150, 150}, WHITE);
 
         // for (const Vector2& i : chickenPositions) {
         //     printf("%f, %f\n",i.x, i.y);
