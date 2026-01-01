@@ -50,13 +50,17 @@ int main(void)
     Texture2D texture = LoadTexture("resources/sprites/Characters/walk.png");
     Rectangle walk = {0,0,SPRITE_DIM, SPRITE_DIM};
     Vector2 position = {screenWidth/2 - SPRITE_DIM/2, screenHeight/2 - SPRITE_DIM/2};
-    float tempSpeed = 5.f;
 
     int frameCount = 4;
 
     int currentFrame = 0;
     int frameCounter = 0;
     int frameSpeed = 8;
+    #ifdef _DEBUG
+    float tempSpeed = 5.f;
+    #else
+    float tempSpeed = 1.875f;
+    #endif
     
     Texture2D grass_temp = LoadTexture("resources/sprites/Tilesets/Grass.png");
     const int grassWidth = 176/11;
@@ -131,6 +135,7 @@ int main(void)
     camera.rotation = 0.0f;                 // No rotation
     camera.zoom = 1.0f;  
     
+    #ifdef _DEBUG
     rini_data config = rini_load(NULL);
     if (FileExists("config.ini")) {
       config = rini_load("config.ini");
@@ -143,6 +148,7 @@ int main(void)
     } else {
       config = rini_load(NULL);
     }
+    #endif
 
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
@@ -166,12 +172,18 @@ int main(void)
         float wheel = GetMouseWheelMove();
         Vector2 movement = {0, 0};
         
+        #ifdef _DEBUG
         if (!isImGuiHovered && IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
+        #else
+        if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+        #endif
             Vector2 delta = GetMouseDelta();
             delta = Vector2Scale(delta, -1.0f/camera.zoom);
             camera.target = Vector2Add(camera.target, delta);
+        
         }
+    
 
         if (wheel != 0)
         {
@@ -393,6 +405,7 @@ int main(void)
 
         EndMode2D();
         // All immediate Gui should only be drawn later after the main rendering
+        #ifdef _DEBUG
         rlImGuiBegin();
         ImGui::Begin("Debug");
         isImGuiHovered = ImGui::IsAnyItemHovered() || ImGui::IsWindowHovered();
@@ -401,6 +414,7 @@ int main(void)
         ImGui::SliderFloat("movementSpeed", &tempSpeed, 0.f, 6.f);
         ImGui::End();
         rlImGuiEnd();
+        #endif
         
 
         EndDrawing();
@@ -411,6 +425,7 @@ int main(void)
     //--------------------------------------------------------------------------------------
     
     // Do close thinging here
+    #ifdef _DEBUG
     char buffer[64] = {0};
     snprintf(buffer, sizeof(buffer), "%d", frameSpeed);
     rini_set_value_text(&config, "frameSpeed", buffer, "frame speed for the animation");
@@ -420,7 +435,7 @@ int main(void)
     rini_set_value_text(&config, "movementSpeed", buffer,
                         "movementSpeed speed for the character");
     rini_save(config, "config.ini");
-    
+    #endif
     return 0;
 }
 

@@ -88,6 +88,19 @@ set_source_files_properties(
 add_executable(${PROJECT_NAME})
 add_subdirectory(src)
 
+# Hide console in Release builds
+target_link_options(${PROJECT_NAME} PRIVATE
+    $<$<CONFIG:Release>:/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup>
+    $<$<CONFIG:RelWithDebInfo>:/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup>
+    $<$<CONFIG:MinSizeRel>:/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup>
+)
+
+
+# Ensure Debug keeps console
+target_link_options(${PROJECT_NAME} PRIVATE
+    $<$<CONFIG:Debug>:/SUBSYSTEM:CONSOLE>
+)
+
 set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME})
 
