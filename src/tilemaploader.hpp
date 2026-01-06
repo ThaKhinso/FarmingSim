@@ -12,6 +12,8 @@ public:
     }
 
     void draw();
+    int getMapWidth() { return mapWidth; }
+    int getMapHeight() { return mapHeight; }
 
 private:
 

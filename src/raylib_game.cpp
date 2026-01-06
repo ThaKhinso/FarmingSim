@@ -31,9 +31,12 @@ enum Direction {
 // Module Functions Declaration
 //----------------------------------------------------------------------------------
 void generateRandomPositions(std::vector<Vector2> &storage, int amountOfPositionsToWrite, int boundX, int boundY) {
+  for (size_t i = 0; i < amountOfPositionsToWrite; i++) {
     const int tempX = GetRandomValue(0, boundX);
     const int tempY = GetRandomValue(0, boundY);
     storage.push_back({(float)tempX, (float)tempY});
+  
+  }
 }
 //----------------------------------------------------------------------------------
 // Program main entry point
@@ -78,6 +81,7 @@ int main(void)
     bool chop = false;
     bool testIsMoving = false;
     std::vector<Object> interactable;
+    std::vector<Object> interactable_chick;
     Object pickaxe = Object(std::string("pickaxe"), 100, 1000, position, false);
     
 
@@ -114,8 +118,20 @@ int main(void)
     const int chickenWidth = 16;
     const int chickenHeight = 16;
     Rectangle chickenSelector = {0,0, chickenWidth, chickenHeight};
+    Animation chickenAnim = Animation(chicken, chickenWidth, chickenHeight, 1,
+                                      2, 10.f * 3, 0.f, true, 2, 4);
     std::vector<Vector2> chickenPositions;
     generateRandomPositions(chickenPositions, 10, screenWidth, screenHeight);
+    for (size_t i = 0; i < chickenPositions.size(); i++) {
+        Object chickenObj = Object("chicken", 0, 200, chickenPositions[i], true);
+      interactable_chick.push_back(chickenObj);
+    }
+    Texture2D egg = LoadTexture("resources/sprites/Characters/Egg_And_Nest.png");
+    const int eggWidth = 16;
+    const int eggHeight = 16;
+    Rectangle eggSelector = {0, 0, eggWidth, eggHeight};
+
+    //interactable.push_back(chickenPositions);
 
     for(int i = 0; i < 3; i++){
         const int tempX = GetRandomValue(0, screenWidth);
@@ -166,6 +182,7 @@ int main(void)
     {
         float dt = GetFrameTime();
       testanim.UpdateAnimation(dt);
+        chickenAnim.UpdateAnimation(dt);
         //UpdateAnimation(&testanim, dt);
         
         // Zoom based on mouse wheel
@@ -266,6 +283,20 @@ int main(void)
                     }
                 }
             }
+
+            for (auto &i : interactable_chick) {
+
+              if (CheckCollisionRecs(
+                      {position.x, position.y, SPRITE_DIM, SPRITE_DIM},
+                      {i.position.x, i.position.y, chickenWidth, chickenHeight})) {
+                if (i.canBeAttacked) {
+                  i.health -= pickaxe.dps * dt;
+                  if (i.health <= 0) {
+                    i.gone = true;
+                  }
+                }
+              }
+            }
              //std::cout << "After updating: " << testanim.getStartFrame() << "\n";
         }
 
@@ -360,17 +391,36 @@ int main(void)
             {-2000, -2000}, WHITE);
 
         testTile.draw();
+
+        //for (int i = 0; i < chickenPositions.size(); i++) {
+        //  
+        //  chickenAnim.DrawAnimation(chickenPositions[i]);
+        //  //DrawTextureRec(chicken, chickenSelector, chickenPositions[i], WHITE);
+        //}
+
+
         for (int i = 0; i < interactable.size(); i++) {
             if (!interactable[i].gone)
           {
+            //chickenAnim.DrawAnimation(interactable[i].position);
               DrawTextureRec(biomis, treeSelector, randomPositions[i], WHITE);
             } else if (interactable[i].gone) {
-            
-              DrawTextureRec(biomis, choppedWood, randomPositions[i], WHITE);
+                DrawTextureRec(biomis, choppedWood, randomPositions[i], WHITE);
+              
             }
         }
 
-        DrawTextureRec(biomis, choppedWood, {150, 150}, WHITE);
+        for (int i = 0; i < interactable_chick.size(); i++) {
+          if (!interactable_chick[i].gone) {
+             chickenAnim.DrawAnimation(interactable_chick[i].position);
+            
+          } else if (interactable_chick[i].gone) {
+            DrawTextureRec(egg, eggSelector, interactable_chick[i].position,
+                           WHITE);
+          }
+        }
+
+        
 
         // for (const Vector2& i : chickenPositions) {
         //     printf("%f, %f\n",i.x, i.y);
